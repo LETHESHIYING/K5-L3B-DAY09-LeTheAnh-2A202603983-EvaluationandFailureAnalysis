@@ -54,7 +54,7 @@ Run `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/basel
 - Fourteen cases limit power for small and rare regressions.
 - Judge calibration uses public replay data, not an independent holdout.
 - Gate owner, production limits, and waiver approver remain unassigned.
-- Current reports and implementation are local and have not yet been committed or reviewed in CI.
+- This v1 addendum describes the Core evaluation. Advanced/Expert v2 results and integrity controls are recorded separately in `docs/eval_card.md`.
 
 ## Versioning
 

@@ -63,6 +63,28 @@ def test_integrity_flags_loosened_spec():
     assert gate.integrity_check(base, base, SPEC, SPEC) == []
 
 
+def test_integrity_flags_duplicates_failures_missing_values_and_slice_relabel():
+    from lab9 import gate
+
+    base = _report(copy.deepcopy(ROWS), {"pass_rate": 1.0})
+    duplicate = _report(copy.deepcopy(ROWS), {"pass_rate": 1.0})
+    duplicate["rows"][-1] = copy.deepcopy(duplicate["rows"][0])
+    assert any("duplicate" in p for p in gate.integrity_check(duplicate, base, SPEC))
+
+    failed_eval = _report(copy.deepcopy(ROWS), {"pass_rate": 1.0})
+    failed_eval["evaluator_failures"] = ["grader crashed"]
+    assert any("evaluator_failures" in p for p in gate.integrity_check(failed_eval, base, SPEC))
+
+    missing = _report(copy.deepcopy(ROWS), {"pass_rate": 1.0})
+    missing["rows"][0]["pass_rate"] = None
+    code_spec = {**SPEC, "metrics": [{**SPEC["metrics"][0], "grader": "code"}]}
+    assert any("missing/None" in p for p in gate.integrity_check(missing, base, code_spec))
+
+    relabeled = _report(copy.deepcopy(ROWS), {"pass_rate": 1.0})
+    relabeled["rows"][0]["slices"] = []
+    assert any("slice tags changed" in p for p in gate.integrity_check(relabeled, base, SPEC))
+
+
 def test_slice_check_blocks_a_slice_below_floor():
     from lab9 import gate
 
@@ -74,3 +96,17 @@ def test_slice_check_blocks_a_slice_below_floor():
     spec = dict(SPEC, slices=[{"name": "denial", "metric": "pass_rate", "min": 0.9, "blocking": True}])
     blocked, _ = gate.slice_check(_report(rows, {"pass_rate": 0.75}), base, spec)
     assert blocked == ["slice:denial/pass_rate"]
+
+
+def test_ratchet_rejects_removed_slice_and_looser_cost_cap():
+    from lab9 import gate
+
+    old = {"eval_set_version": "v2", "metrics": [{"id": "cost", "threshold": {"max_increase": 0.1}}],
+           "slices": [{"name": "money", "metric": "pass_rate", "min": 0.9,
+                       "no_significant_drop": True, "blocking": True}]}
+    new = copy.deepcopy(old)
+    new["metrics"][0]["threshold"]["max_increase"] = 0.2
+    new["slices"] = []
+    problems = gate._ratchet_problems(new, old)
+    assert any("max_increase" in p for p in problems)
+    assert any("removed slice" in p for p in problems)

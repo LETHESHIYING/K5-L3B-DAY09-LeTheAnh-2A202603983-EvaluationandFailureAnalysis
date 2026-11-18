@@ -8,6 +8,7 @@ Reference values to self-check are in tests/test_lab9_stats.py.
 from __future__ import annotations
 
 import math
+import operator
 from collections.abc import Sequence
 
 POS = "FAIL"   # the judge's job is to FIND failures, so FAIL is the positive class
@@ -123,13 +124,33 @@ def paired_bootstrap(a: Sequence[float], b: Sequence[float], *, n_resamples: int
 def pass_at_k(n: int, c: int, k: int) -> float:
     """Probability that AT LEAST ONE of k trials drawn from n (c of them passing) passes.
     Unbiased estimator (Chen et al. 2021): 1 - C(n-c, k) / C(n, k). Raise ValueError if k > n."""
-    # TODO M6
-    raise NotImplementedError
+    ni, ci, ki = _validate_k_args(n, c, k)
+    if ni - ci < ki:
+        return 1.0
+    return 1.0 - math.comb(ni - ci, ki) / math.comb(ni, ki)
 
 
 def pass_hat_k(n: int, c: int, k: int) -> float:
     """pass^k (tau-bench, Yao et al. 2024): probability that ALL k trials drawn from n pass.
     Unbiased estimator: C(c, k) / C(n, k). Raise ValueError if k > n.
     pass^k <= pass@1 <= pass@k; a reliable agent keeps pass^k close to pass@1."""
-    # TODO M6
-    raise NotImplementedError
+    ni, ci, ki = _validate_k_args(n, c, k)
+    if ci < ki:
+        return 0.0
+    return math.comb(ci, ki) / math.comb(ni, ki)
+
+
+def _validate_k_args(n: int, c: int, k: int) -> tuple[int, int, int]:
+    values = []
+    for name, value in (("n", n), ("c", c), ("k", k)):
+        if isinstance(value, bool):
+            raise ValueError(f"{name} must be an integer, got bool")
+        try:
+            value = operator.index(value)
+        except TypeError as exc:
+            raise ValueError(f"invalid (n, c, k)=({n!r}, {c!r}, {k!r})") from exc
+        values.append(value)
+    ni, ci, ki = values
+    if ni <= 0 or ci < 0 or ci > ni or ki <= 0 or ki > ni:
+        raise ValueError(f"invalid (n, c, k)=({ni}, {ci}, {ki})")
+    return ni, ci, ki
