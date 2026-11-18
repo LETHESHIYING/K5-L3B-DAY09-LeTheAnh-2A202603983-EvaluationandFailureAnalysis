@@ -1,13 +1,13 @@
-﻿# PRD v1.1 — LogiX-VN refund agent (evaluation addendum)
+# PRD v1.1 — LogiX-VN refund agent (evaluation addendum)
 
 > This addendum makes the Day 8 pilot's correctness criteria measurable. It does not change product behavior. Values below are from generated local reports.
 
 ## Evaluation scope
 
-- Eval set v1: 14 public claim cases, each evaluated with five fixed seeds (11, 22, 33, 44, 55); SHA `c8c971e37bbf`.
+- Eval set v1: 14 public claim cases, each evaluated with five fixed seeds (11, 22, 33, 44, 55); SHA `b546a7ca4728`.
 - Evaluated implementation: instructor `swarm` reference shape with MockLLM and isolated temporary stores.
 - This does not establish real-model or live-customer performance. Production channels, eligibility boundaries, and refund caps are unspecified in the project materials.
-- Baseline: `E-swarm-20261118-c8c9` (`src/reports/baseline_v1.json`). Metric definitions are in `src/config/metric_spec.yaml`.
+- Baseline: `E-swarm-20261118-b546` (`src/reports/baseline_v1.json`). Metric definitions are in `src/config/metric_spec.yaml`.
 
 ## Operational definition of correct
 
@@ -25,8 +25,8 @@
 
 “No significant drop” means the 95% paired percentile bootstrap CI for candidate minus baseline is not entirely below zero. The gate uses 1,000 resamples, paired by item, with RNG seed 2027.
 
-- Fixed reference `E-fixed-20261118-c8c9`: pass rate 1.0000; delta +0.014, CI [0.000, +0.043]; gate accepted (exit 0).
-- Seeded regression `E-seeded_regression-20261118-c8c9`: pass rate 0.7143; delta -0.271, CI [-0.500, -0.057]; gate rejected (exit 1) on `refund_amount_correct`, `reply_amount_matches_ledger`, and `pass_rate`.
+- Fixed reference `E-fixed-20261118-b546`: pass rate 1.0000; delta +0.014, CI [0.000, +0.043]; gate accepted (exit 0).
+- Seeded regression `E-seeded_regression-20261118-b546`: pass rate 0.7143; delta -0.271, CI [-0.500, -0.057]; gate rejected (exit 1) on `refund_amount_correct`, `reply_amount_matches_ledger`, and `pass_rate`.
 
 ## Failure modes and checks
 
